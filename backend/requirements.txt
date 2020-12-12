@@ -1,0 +1,6 @@
+kazoo
+eventlet
+pyzmq
+fastapi
+uvicorn
+sse-starlette
