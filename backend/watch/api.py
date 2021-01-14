@@ -3,6 +3,8 @@ import asyncio
 import uvicorn
 import zmq
 from fastapi import FastAPI, Request
+from fastapi.staticfiles import StaticFiles
+
 from sse_starlette.sse import EventSourceResponse
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -82,6 +84,7 @@ async def get_components():
     return message
 
 
+app.mount("/", StaticFiles(directory="build"), name="build")
 
 if __name__ == '__main__':
     uvicorn.run(app, host='0.0.0.0', port=8080)

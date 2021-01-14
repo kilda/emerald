@@ -31,7 +31,7 @@ class App extends React.Component {
     }
 
     componentDidMount() {
-        fetch("http://localhost:8080/components",
+        fetch("/components",
             {
                 credentials: 'include'
             })
@@ -52,7 +52,7 @@ class App extends React.Component {
                     });
                 }
             );
-        const sse = new EventSource('http://localhost:8080/stream', {withCredentials: true});
+        const sse = new EventSource('/stream', {withCredentials: true});
         sse.onmessage = e => this.getRealtimeData(e.data);
         sse.onerror = () => {
             // error log here

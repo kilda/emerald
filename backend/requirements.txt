@@ -4,3 +4,4 @@ pyzmq
 fastapi
 uvicorn
 sse-starlette
+aiofiles
