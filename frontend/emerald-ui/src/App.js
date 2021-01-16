@@ -4,7 +4,7 @@ import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import ListGroup from "react-bootstrap/ListGroup";
-
+import Button from "react-bootstrap/Button";
 
 class App extends React.Component {
     constructor(props) {
@@ -31,7 +31,7 @@ class App extends React.Component {
     }
 
     componentDidMount() {
-        fetch("/components",
+        fetch("http://localhost:8080/components",
             {
                 credentials: 'include'
             })
@@ -52,7 +52,7 @@ class App extends React.Component {
                     });
                 }
             );
-        const sse = new EventSource('/stream', {withCredentials: true});
+        const sse = new EventSource('http://localhost:8080/stream', {withCredentials: true});
         sse.onmessage = e => this.getRealtimeData(e.data);
         sse.onerror = () => {
             // error log here
@@ -86,7 +86,16 @@ class App extends React.Component {
                                             key={item.service + '/' + item.color}
                                             variant={item.state === 0 ? 'danger' : 'success'}
                                             >
-                                            {item.service}/{item.color} {item.state}
+                                            <div>
+                                                <span>{item.service} </span>
+                                                <span>{item.color} </span>
+                                                <span> {item.state} </span>
+                                                <span>
+                                                    <Button variant="outline-info" size="sm">
+                                                        {item.state ? 'Shutdown' : 'Start'}
+                                                    </Button>
+                                                </span>
+                                            </div>
                                         </ListGroup.Item>
 
                                     ))}
