@@ -1,10 +1,15 @@
 import logging
-from functools import partial
 import os
+import sys
+from functools import partial
+
 import eventlet
 from eventlet.green import zmq
 from kazoo.client import KazooClient
 from kazoo.handlers.eventlet import SequentialEventletHandler
+
+logging.basicConfig(stream=sys.stdout, level='DEBUG')
+logger = logging.getLogger('app')
 
 ctx = zmq.Context()
 pub_sock = ctx.socket(zmq.PUB)
@@ -20,8 +25,6 @@ zk.start()
 
 paths_map = {}
 component_map = {}
-
-logger = logging.getLogger('app')
 
 
 class Component:

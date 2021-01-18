@@ -1,17 +1,19 @@
-import asyncio
+import json
+import logging
+import sys
 
 import uvicorn
 import zmq
-from fastapi import FastAPI, Request
-from fastapi.staticfiles import StaticFiles
-
-from sse_starlette.sse import EventSourceResponse
-
+from fastapi import FastAPI
+from fastapi import Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+from sse_starlette.sse import EventSourceResponse
 from zmq.asyncio import Context
-import json
-import logging
+
+logging.basicConfig(stream=sys.stdout, level='DEBUG')
+
 
 class Path(BaseModel):
     path: str
