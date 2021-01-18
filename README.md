@@ -6,4 +6,4 @@
 
 ## Run
 
-`docker run -d -p 8080:8080 --network="zk_net_id"  emerald`
+`docker run -d -e ZK_HOSTS=zookeeper.pendev:2181 -p 8080:8080 --network="zk_net_id"  emerald`

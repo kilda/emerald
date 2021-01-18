@@ -1,6 +1,6 @@
 import logging
 from functools import partial
-
+import os
 import eventlet
 from eventlet.green import zmq
 from kazoo.client import KazooClient
@@ -13,8 +13,8 @@ pub_sock.bind("tcp://*:6666")
 
 rep_sock = ctx.socket(zmq.REP)
 rep_sock.bind("tcp://*:6667")
-
-zk = KazooClient(hosts='zookeeper.pendev:2181',
+hosts = os.environ.get('ZK_HOSTS')
+zk = KazooClient(hosts=hosts,
                  handler=SequentialEventletHandler())
 zk.start()
 
