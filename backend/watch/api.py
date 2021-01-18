@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
+from starlette.responses import RedirectResponse
 from zmq.asyncio import Context
 
 logging.basicConfig(stream=sys.stdout, level='DEBUG')
@@ -84,6 +85,11 @@ async def get_components():
     await req_sock.send_json({'type': 'components'})
     message = await req_sock.recv_json()
     return message
+
+@app.get("/")
+async def redirect():
+    response = RedirectResponse(url='/index.html')
+    return response
 
 
 app.mount("/", StaticFiles(directory="build"), name="build")
