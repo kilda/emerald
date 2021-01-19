@@ -8,6 +8,7 @@ from eventlet.green import zmq
 from kazoo.client import KazooClient
 from kazoo.handlers.eventlet import SequentialEventletHandler
 
+
 logging.basicConfig(stream=sys.stdout, level='DEBUG')
 logger = logging.getLogger('app')
 
@@ -73,14 +74,26 @@ def handle_requests():
     while True:
         message = rep_sock.recv_json()
         m_type = message['type']
-        if m_type == 'path':
+        if m_type == 'get_path':
             path = message['path']
             rep_sock.send_json({'path': path,
                                 'data': paths_map[path].get_for_path(path)})
-        elif m_type == 'component':
+        elif m_type == 'set_path':
+            path = message['path']
+            new_val = str.encode(message['value'])
+            zk.set_async(path, new_val)
+            rep_sock.send_json({'path': path,
+                                'success': True})
+        elif m_type == 'get_component':
             comp = message['component']
             env = message['env']
             rep_sock.send_json(vars(component_map[(comp, env)]))
+        elif m_type == 'update_component':
+            comp = message['component']
+            zk.set(comp['signal_path'], str.encode(comp['signal']))
+            zk.set(comp['version_path'], str.encode(comp['version']))
+            rep_sock.send_json({'path': comp['service'] + '/' + comp['color'],
+                                'success': True})
         elif m_type == 'components':
             ans = []
             for v in component_map.values():
