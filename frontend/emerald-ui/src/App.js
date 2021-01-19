@@ -105,6 +105,34 @@ class App extends React.Component {
                             </ListGroup>
                         </Col>
                     </Row>
+                    <Row className='mt-3'>
+                        <Col>
+                            <ListGroup>
+                                {vals.filter(item => item.service === "floodlight")
+                                    .map(item => (
+                                        <ListGroup.Item
+                                            key={item.service + '/' + item.color}
+                                            variant={item.state === 0 ? 'danger' : 'success'}
+                                            >
+                                            {item.service}/{item.color} {item.state}
+                                        </ListGroup.Item>
+
+                                    ))}
+                            </ListGroup>
+                        </Col>
+                        <Col>
+                            <ListGroup>
+                                {vals.filter(item => item.color !== "green" && item.color !== "blue" && item.service !== "floodlight")
+                                    .map(item => (
+                                        <ListGroup.Item
+                                            key={item.service + '/' + item.color}
+                                            variant={item.state === 0 ? 'danger' : 'success'}>
+                                            {item.service}/{item.color} {item.state}
+                                        </ListGroup.Item>
+                                    ))}
+                            </ListGroup>
+                        </Col>
+                    </Row>
                 </Container>);
         }
     }
