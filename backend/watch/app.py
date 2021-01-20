@@ -20,6 +20,7 @@ pub_sock.bind("tcp://*:6666")
 rep_sock = ctx.socket(zmq.REP)
 rep_sock.bind("tcp://*:6667")
 hosts = os.environ.get('ZK_HOSTS')
+zk_root_node = os.environ.get('ZK_ROOT_NODE')
 zk = KazooClient(hosts=hosts,
                  handler=SequentialEventletHandler())
 zk.start()
@@ -200,7 +201,7 @@ def discover_unit(root, component, env):
 
 
 if __name__ == '__main__':
-    get_states()
+    get_states(zk_root_node)
     eventlet.spawn(handle_requests)
     while True:
         eventlet.sleep(30)
