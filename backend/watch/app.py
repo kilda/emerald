@@ -70,12 +70,32 @@ def my_callback(path, data, stat):
         logger.error(e)
 
 
-def my_children_callback(root, component, env, children, event):
+def unit_children_callback(root, component, env, children, event):
     try:
-        if event.type == EventType.CHILD:
+        if event and event.type == EventType.CHILD:
             logger.info('received children update for path %s',
                         '/'.join([root, component, env]))
             discover_unit(root, component, env)
+    except Exception as e:
+        logger.error(e)
+
+
+def component_children_callback(root, component, children, event):
+    try:
+        if event and event.type == EventType.CHILD:
+            logger.info('received children update for path %s',
+                        '/'.join([root, component]))
+            discover_components(root, component)
+    except Exception as e:
+        logger.error(e)
+
+
+def root_children_callback(root, children, event):
+    try:
+        if event and event.type == EventType.CHILD:
+            logger.info('received children update for path %s',
+                        root)
+            get_states(root)
     except Exception as e:
         logger.error(e)
 
@@ -121,12 +141,18 @@ def get_paths(root='/kilda'):
 
 
 def get_states(root='/kilda'):
+    zk.ChildrenWatch(root,
+                     partial(root_children_callback, root),
+                     send_event=True)
     children = zk.get_children(root)
     for component in children:
         discover_components(root, component)
 
 
 def discover_components(root, component):
+    zk.ChildrenWatch('/'.join([root, component]),
+                     partial(component_children_callback, root, component),
+                     send_event=True)
     envs = zk.get_children('/'.join([root, component]))
     components = []
     for env in envs:
@@ -140,7 +166,7 @@ STATE = 'state'
 
 def discover_unit(root, component, env):
     zk.ChildrenWatch('/'.join([root, component, env]),
-                     partial(my_children_callback, root, component, env),
+                     partial(unit_children_callback, root, component, env),
                      send_event=True)
     build_version_path = '/'.join([root, component, env, BUILD_VERSION])
     build_version = None
