@@ -5,8 +5,8 @@
 `docker build -t emerald .`
 
 ## Run
-
-`docker run -d -e ZK_HOSTS=zookeeper.pendev:2181 -p 8080:8080 --network="zk_net_id"  emerald`
+`kilda_docker_net=$(docker network list | grep open-kilda | awk '{print $1}')`
+`docker run --name emerald -d -e ZK_HOSTS=zookeeper.pendev:2181 -p 1090:8080 --network=$kilda_docker_net  emerald`
 
 ## Swagger
 
