@@ -7,7 +7,7 @@ import eventlet
 from eventlet.green import zmq
 from kazoo.client import KazooClient
 from kazoo.handlers.eventlet import SequentialEventletHandler
-
+from kazoo.protocol.states import EventType
 
 logging.basicConfig(stream=sys.stdout, level='DEBUG')
 logger = logging.getLogger('app')
@@ -66,6 +66,16 @@ def my_callback(path, data, stat):
         if path in paths_map:
             paths_map[path].update_for_path(path, data)
             pub_sock.send_json(vars(paths_map[path]))
+    except Exception as e:
+        logger.error(e)
+
+
+def my_children_callback(root, component, env, children, event):
+    try:
+        if event.type == EventType.CHILD:
+            logger.info('received children update for path %s',
+                        '/'.join([root, component, env]))
+            discover_unit(root, component, env)
     except Exception as e:
         logger.error(e)
 
@@ -129,6 +139,9 @@ STATE = 'state'
 
 
 def discover_unit(root, component, env):
+    zk.ChildrenWatch('/'.join([root, component, env]),
+                     partial(my_children_callback, root, component, env),
+                     send_event=True)
     build_version_path = '/'.join([root, component, env, BUILD_VERSION])
     build_version = None
     if zk.exists(build_version_path):

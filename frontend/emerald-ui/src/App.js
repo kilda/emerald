@@ -191,7 +191,7 @@ class App extends React.Component {
                                         .map(item => (
                                             <ListGroup.Item
                                                 key={item.service + '/' + item.color}
-                                                variant={item.state === 0 ? 'danger' : 'success'}
+                                                variant={item.state ? 'success' : 'danger'}
                                                 action
                                                 onClick={() => this.showModal(item)}
                                             >
@@ -207,7 +207,7 @@ class App extends React.Component {
                                         .map(item => (
                                             <ListGroup.Item
                                                 key={item.service + '/' + item.color}
-                                                variant={item.state === 0 ? 'danger' : 'success'}
+                                                variant={item.state ? 'success' : 'danger'}
                                                 action
                                                 onClick={() => this.showModal(item)}
                                             >
@@ -224,7 +224,7 @@ class App extends React.Component {
                                         .map(item => (
                                             <ListGroup.Item
                                                 key={item.service + '/' + item.color}
-                                                variant={item.state === 0 ? 'danger' : 'success'}
+                                                variant={item.state ? 'success' : 'danger'}
                                                 action
                                                 onClick={() => this.showModal(item)}
                                             >
@@ -240,7 +240,7 @@ class App extends React.Component {
                                         .map(item => (
                                             <ListGroup.Item
                                                 key={item.service + '/' + item.color}
-                                                variant={item.state === 0 ? 'danger' : 'success'}>
+                                                variant='success'>
                                                 {item.service}/{item.color} {item.version} {item.state}
                                             </ListGroup.Item>
                                         ))}
