@@ -71,9 +71,10 @@ class App extends React.Component {
                 color: '',
                 signal: '',
                 state: '',
-
+                version: ''
             }
         });
+        this.getComponents()
     }
 
     async updateCurrent() {
