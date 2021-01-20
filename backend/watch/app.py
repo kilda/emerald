@@ -20,7 +20,7 @@ pub_sock.bind("tcp://*:6666")
 rep_sock = ctx.socket(zmq.REP)
 rep_sock.bind("tcp://*:6667")
 hosts = os.environ.get('ZK_HOSTS')
-zk_root_node = os.environ.get('ZK_ROOT_NODE')
+zk_root = os.environ.get('ZK_ROOT')
 zk = KazooClient(hosts=hosts,
                  handler=SequentialEventletHandler())
 zk.start()
@@ -132,7 +132,7 @@ def handle_requests():
             rep_sock.send_json(ans)
 
 
-def get_paths(root='/kilda'):
+def get_paths(root=zk_root):
     children = zk.get_children(root)
     if children:
         for child in children:
@@ -141,7 +141,7 @@ def get_paths(root='/kilda'):
         zk.DataWatch(root, partial(my_callback, root))
 
 
-def get_states(root='/kilda'):
+def get_states(root=zk_root):
     zk.ChildrenWatch(root,
                      partial(root_children_callback, root),
                      send_event=True)
@@ -201,7 +201,7 @@ def discover_unit(root, component, env):
 
 
 if __name__ == '__main__':
-    get_states(zk_root_node)
+    get_states()
     eventlet.spawn(handle_requests)
     while True:
         eventlet.sleep(30)
