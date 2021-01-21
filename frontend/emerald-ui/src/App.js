@@ -141,7 +141,9 @@ class App extends React.Component {
         } else {
             var vals = []
             Object.keys(items).forEach(k => vals.push(items[k]));
-
+            vals.sort(function (a, b) {
+                return a.service.localeCompare(b.service);
+            });
             return (
                 <>
                     <Modal
@@ -192,7 +194,7 @@ class App extends React.Component {
                                         .map(item => (
                                             <ListGroup.Item
                                                 key={item.service + '/' + item.color}
-                                                variant={item.state ? 'success' : 'danger'}
+                                                variant={item.state || item.service === "grpc" || item.service === "northbound" ? 'success' : 'danger'}
                                                 action
                                                 onClick={() => this.showModal(item)}
                                             >
@@ -208,7 +210,7 @@ class App extends React.Component {
                                         .map(item => (
                                             <ListGroup.Item
                                                 key={item.service + '/' + item.color}
-                                                variant={item.state ? 'success' : 'danger'}
+                                                variant={item.state || item.service === "grpc" || item.service === "northbound" ? 'success' : 'danger'}
                                                 action
                                                 onClick={() => this.showModal(item)}
                                             >

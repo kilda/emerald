@@ -27,6 +27,7 @@ zk.start()
 
 paths_map = {}
 component_map = {}
+discovered_components = set()
 
 
 class Component:
@@ -147,7 +148,9 @@ def get_states(root=zk_root):
                      send_event=True)
     children = zk.get_children(root)
     for component in children:
-        discover_components(root, component)
+        if component not in discovered_components:
+            discover_components(root, component)
+            discovered_components.add(component)
 
 
 def discover_components(root, component):
@@ -155,9 +158,8 @@ def discover_components(root, component):
                      partial(component_children_callback, root, component),
                      send_event=True)
     envs = zk.get_children('/'.join([root, component]))
-    components = []
     for env in envs:
-        components.append(discover_unit(root, component, env))
+        discover_unit(root, component, env)
 
 
 BUILD_VERSION = 'build-version'
