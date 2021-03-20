@@ -33,7 +33,7 @@ discovered_components = set()
 
 class Component:
     def __init__(self, service, color, signal, signal_path, state,
-                 state_path, version, version_path):
+                 state_path, version, version_path, expected_state, expected_state_path):
         self.service = service
         self.color = color
         self.signal = signal
@@ -42,6 +42,8 @@ class Component:
         self.state_path = state_path
         self.version = version
         self.version_path = version_path
+        self.expected_state = expected_state
+        self.expected_state_path = expected_state_path
 
     def update_for_path(self, path, val):
         if path == self.signal_path:
@@ -52,6 +54,8 @@ class Component:
             self.state = val
         elif path == self.version_path:
             self.version = val
+        elif path == self.expected_state_path:
+            self.expected_state = int(val)
 
     def get_for_path(self, path):
         if path == self.signal_path:
@@ -60,6 +64,8 @@ class Component:
             return self.state
         elif path == self.version_path:
             return self.version
+        elif path == self.expected_state_path:
+            return self.expected_state
 
 
 def my_callback(path, data, stat):
@@ -167,6 +173,7 @@ def discover_components(root, component):
 BUILD_VERSION = 'build-version'
 SIGNAL = 'signal'
 STATE = 'state'
+EXPECTED_STATE = 'expected_state'
 
 
 def discover_unit(root, component, env):
@@ -194,10 +201,18 @@ def discover_unit(root, component, env):
             state = int(state)
         zk.DataWatch(state_path, partial(my_callback, state_path))
 
+    expected_state_path = '/'.join([root, component, env, EXPECTED_STATE])
+    expected_state = None
+    if zk.exists(expected_state_path):
+        expected_state = zk.get(expected_state_path)[0].decode('utf-8')
+        if expected_state:
+            expected_state = int(expected_state)
+
     comp = Component(component, env, signal=signal,
                      signal_path=signal_path, state=state,
                      state_path=state_path, version=build_version,
-                     version_path=build_version_path)
+                     version_path=build_version_path, expected_state=expected_state,
+                     expected_state_path=expected_state_path)
     paths_map[signal_path] = comp
     paths_map[state_path] = comp
     paths_map[build_version_path] = comp

@@ -39,6 +39,8 @@ class Component(BaseModel):
     state_path: str
     version: str
     version_path: str
+    expected_state: Optional[int]
+    expected_state_path: str
 
 
 class Path(BaseModel):
@@ -102,13 +104,13 @@ async def update_for_path(path: Path):
 @app.get('/components/{component}/{env}')
 async def get_component(component: str, env: str):
     return await process_request({'type': 'get_component',
-                                   'component': component, 'env': env})
+                                  'component': component, 'env': env})
 
 
 @app.post('/components')
 async def update_component(obj: Component):
     return await process_request({'type': 'update_component',
-                                   'component': vars(obj)})
+                                  'component': vars(obj)})
 
 
 @app.get('/components')
