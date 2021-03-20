@@ -13,7 +13,7 @@ docker \
     -d \
     -e ZK_HOSTS=zookeeper.pendev:2181 \
     -e ZK_ROOT=/kilda \
-    -p 1090:8080 \
+    -p 1090:1090 \
     --network=$kilda_docker_net  \
     emerald
 ```

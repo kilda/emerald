@@ -14,5 +14,5 @@ WORKDIR /app/emerald-ui
 RUN npm install
 RUN npm run-script build
 RUN cp -r /app/emerald-ui/build /app
-EXPOSE 8080
+EXPOSE 1090
 CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

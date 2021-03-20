@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import sys
@@ -18,7 +19,7 @@ pub_sock = ctx.socket(zmq.PUB)
 pub_sock.bind("tcp://*:6666")
 
 rep_sock = ctx.socket(zmq.REP)
-rep_sock.bind("tcp://*:6667")
+rep_sock.connect("tcp://localhost:6667")
 hosts = os.environ.get('ZK_HOSTS')
 zk_root = os.environ.get('ZK_ROOT')
 zk = KazooClient(hosts=hosts,
@@ -104,7 +105,8 @@ def root_children_callback(root, children, event):
 
 def handle_requests():
     while True:
-        message = rep_sock.recv_json()
+        message = json.loads(rep_sock.recv_multipart()[0])
+        print(message)
         m_type = message['type']
         if m_type == 'get_path':
             path = message['path']

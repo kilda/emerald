@@ -1,6 +1,7 @@
 import json
 import logging
 import sys
+from typing import Optional
 
 import uvicorn
 import zmq
@@ -12,8 +13,6 @@ from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
 from starlette.responses import RedirectResponse
 from zmq.asyncio import Context
-from typing import Optional
-
 
 logging.basicConfig(stream=sys.stdout, level='DEBUG')
 
@@ -30,6 +29,7 @@ app.add_middleware(
 )
 logger = logging.getLogger('api')
 
+
 class Component(BaseModel):
     service: str
     color: str
@@ -44,6 +44,15 @@ class Component(BaseModel):
 class Path(BaseModel):
     path: str
     value: str
+
+
+async def process_request(payload):
+    await req_sock.send(b'', zmq.SNDMORE)
+    await req_sock.send_json(payload)
+    message = await req_sock.recv_multipart()
+    resp = json.loads(message[1])
+    return resp
+
 
 @app.get('/stream')
 async def message_stream(request: Request):
@@ -69,8 +78,8 @@ async def message_stream(request: Request):
 async def startup_event():
     global req_sock
     ctx = Context.instance()
-    req_sock = ctx.socket(zmq.REQ)
-    req_sock.connect('tcp://localhost:6667')
+    req_sock = ctx.socket(zmq.DEALER)
+    req_sock.bind('tcp://*:6667')
 
     global sub_sock
     sub_sock = ctx.socket(zmq.SUB)
@@ -81,40 +90,30 @@ async def startup_event():
 
 @app.post('/path')
 async def read_for_path(path: Path):
-    await req_sock.send_json({'type': 'get_path', 'path': path.path})
-    message = await req_sock.recv_json()
-    return message
+    return await process_request({'type': 'get_path', 'path': path.path})
 
 
 @app.put('/path')
 async def update_for_path(path: Path):
-    await req_sock.send_json({'type': 'set_path', 'path': path.path,
-                              'value': path.value})
-    message = await req_sock.recv_json()
-    return message
+    return await process_request({'type': 'set_path', 'path': path.path,
+                                  'value': path.value})
 
 
 @app.get('/components/{component}/{env}')
 async def get_component(component: str, env: str):
-    await req_sock.send_json({'type': 'get_component',
-                              'component': component, 'env': env})
-    message = await req_sock.recv_json()
-    return message
+    return await process_request({'type': 'get_component',
+                                   'component': component, 'env': env})
 
 
 @app.post('/components')
 async def update_component(obj: Component):
-    await req_sock.send_json({'type': 'update_component',
-                              'component': vars(obj)})
-    message = await req_sock.recv_json()
-    return message
+    return await process_request({'type': 'update_component',
+                                   'component': vars(obj)})
 
 
 @app.get('/components')
 async def get_components():
-    await req_sock.send_json({'type': 'components'})
-    message = await req_sock.recv_json()
-    return message
+    return await process_request({'type': 'components'})
 
 
 @app.get("/")
@@ -126,4 +125,4 @@ async def redirect():
 app.mount("/", StaticFiles(directory="build"), name="build")
 
 if __name__ == '__main__':
-    uvicorn.run(app, host='0.0.0.0', port=8080)
+    uvicorn.run(app, host='0.0.0.0', port=1090)

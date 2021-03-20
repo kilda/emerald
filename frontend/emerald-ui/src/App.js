@@ -22,7 +22,7 @@ class App extends React.Component {
                 color: '',
                 signal: '',
                 state: '',
-
+                expected_state: '',
             }
         };
     }
@@ -71,7 +71,8 @@ class App extends React.Component {
                 color: '',
                 signal: '',
                 state: '',
-                version: ''
+                version: '',
+                expected_state: ''
             }
         });
         this.getComponents()
@@ -130,6 +131,19 @@ class App extends React.Component {
         let cur = this.state.current
         cur.version = val;
         this.setState({current: cur})
+    }
+
+    get_color(item) {
+        if (item.service === "grpc" || item.service === "northbound") {
+            return 'success';
+        }
+        if (item.state > 0 && item.state === item.expected_state) {
+            return 'success';
+        }
+        if (item.state === null || item.state === 0) {
+            return 'danger';
+        }
+        return 'warning';
     }
 
     render() {
@@ -194,7 +208,7 @@ class App extends React.Component {
                                         .map(item => (
                                             <ListGroup.Item
                                                 key={item.service + '/' + item.color}
-                                                variant={item.state || item.service === "grpc" || item.service === "northbound" ? 'success' : 'danger'}
+                                                variant={this.get_color(item)}
                                                 action
                                                 onClick={() => this.showModal(item)}
                                             >
@@ -210,7 +224,7 @@ class App extends React.Component {
                                         .map(item => (
                                             <ListGroup.Item
                                                 key={item.service + '/' + item.color}
-                                                variant={item.state || item.service === "grpc" || item.service === "northbound" ? 'success' : 'danger'}
+                                                variant={this.get_color(item)}
                                                 action
                                                 onClick={() => this.showModal(item)}
                                             >
