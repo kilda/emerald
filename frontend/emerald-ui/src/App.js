@@ -174,14 +174,26 @@ class App extends React.Component {
                         </Modal.Header>
                         <Modal.Body>
                             <Form>
-                                <Form.Group controlId="formBasicEmail">
+                                <Form.Group controlId="formVersion">
                                     <Form.Label>Version</Form.Label>
                                     <Form.Control type="text"
                                                   onChange={(e) => this.updateVersion(e.target.value)}
                                                   value={this.state.current.version}/>
                                 </Form.Group>
 
-                                <Form.Group controlId="formBasicCheckbox">
+                                <Form.Group controlId="formState">
+                                    <Form.Label>State</Form.Label>
+                                    <Form.Control type="text"
+                                                  value={this.state.current.state} readonly/>
+                                </Form.Group>
+
+                                <Form.Group controlId="formExpectedState">
+                                    <Form.Label>Expected State</Form.Label>
+                                    <Form.Control type="text"
+                                                  value={this.state.current.expected_state} readonly/>
+                                </Form.Group>
+
+                                <Form.Group controlId="formActive">
                                     <Form.Check type="switch"
                                                 label="Activate"
                                                 checked={this.state.current.signal === "START"}
