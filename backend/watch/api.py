@@ -14,7 +14,7 @@ from sse_starlette.sse import EventSourceResponse
 from starlette.responses import RedirectResponse
 from zmq.asyncio import Context
 
-logging.basicConfig(stream=sys.stdout, level='DEBUG')
+logging.basicConfig(stream=sys.stdout, level='INFO')
 
 req_sock = None
 sub_sock = None

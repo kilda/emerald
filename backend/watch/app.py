@@ -10,7 +10,7 @@ from kazoo.client import KazooClient
 from kazoo.handlers.eventlet import SequentialEventletHandler
 from kazoo.protocol.states import EventType
 
-logging.basicConfig(stream=sys.stdout, level='DEBUG')
+logging.basicConfig(stream=sys.stdout, level='INFO')
 logger = logging.getLogger('app')
 
 ctx = zmq.Context()
@@ -177,46 +177,58 @@ EXPECTED_STATE = 'expected_state'
 
 
 def discover_unit(root, component, env):
-    zk.ChildrenWatch('/'.join([root, component, env]),
-                     partial(unit_children_callback, root, component, env),
-                     send_event=True)
-    build_version_path = '/'.join([root, component, env, BUILD_VERSION])
-    build_version = None
-    if zk.exists(build_version_path):
-        build_version = zk.get(build_version_path)[0].decode('utf-8')
-        zk.DataWatch(build_version_path, partial(my_callback,
-                                                 build_version_path))
+    try:
+        zk.ChildrenWatch('/'.join([root, component, env]),
+                         partial(unit_children_callback, root, component, env),
+                         send_event=True)
+        build_version_path = '/'.join([root, component, env, BUILD_VERSION])
+        build_version = None
+        if zk.exists(build_version_path):
+            build_version = zk.get(build_version_path)[0]
+            if build_version is not None:
+                build_version = build_version.decode('utf-8')
+            zk.DataWatch(build_version_path, partial(my_callback,
+                                                     build_version_path))
 
-    signal_path = '/'.join([root, component, env, SIGNAL])
-    signal = None
-    if zk.exists(signal_path):
-        signal = zk.get(signal_path)[0].decode('utf-8')
-        zk.DataWatch(signal_path, partial(my_callback, signal_path))
+        signal_path = '/'.join([root, component, env, SIGNAL])
+        signal = None
+        if zk.exists(signal_path):
+            signal = zk.get(signal_path)[0]
+            if signal is not None:
+                signal = signal.decode('utf-8')
+            zk.DataWatch(signal_path, partial(my_callback, signal_path))
 
-    state_path = '/'.join([root, component, env, STATE])
-    state = None
-    if zk.exists(state_path):
-        state = zk.get(state_path)[0].decode('utf-8')
-        if state:
-            state = int(state)
-        zk.DataWatch(state_path, partial(my_callback, state_path))
+        state_path = '/'.join([root, component, env, STATE])
+        state = None
+        if zk.exists(state_path):
+            state = zk.get(state_path)[0]
+            if state is not None:
+                state = state.decode('utf-8')
+            if state:
+                state = int(state)
+            zk.DataWatch(state_path, partial(my_callback, state_path))
 
-    expected_state_path = '/'.join([root, component, env, EXPECTED_STATE])
-    expected_state = None
-    if zk.exists(expected_state_path):
-        expected_state = zk.get(expected_state_path)[0].decode('utf-8')
-        if expected_state:
-            expected_state = int(expected_state)
+        expected_state_path = '/'.join([root, component, env, EXPECTED_STATE])
+        expected_state = None
+        if zk.exists(expected_state_path):
+            expected_state = zk.get(expected_state_path)[0]
+            if expected_state is not None:
+                expected_state = expected_state.decode('utf-8')
+            if expected_state:
+                expected_state = int(expected_state)
 
-    comp = Component(component, env, signal=signal,
-                     signal_path=signal_path, state=state,
-                     state_path=state_path, version=build_version,
-                     version_path=build_version_path, expected_state=expected_state,
-                     expected_state_path=expected_state_path)
-    paths_map[signal_path] = comp
-    paths_map[state_path] = comp
-    paths_map[build_version_path] = comp
-    component_map[(component, env)] = comp
+        comp = Component(component, env, signal=signal,
+                         signal_path=signal_path, state=state,
+                         state_path=state_path, version=build_version,
+                         version_path=build_version_path, expected_state=expected_state,
+                         expected_state_path=expected_state_path)
+        paths_map[signal_path] = comp
+        paths_map[state_path] = comp
+        paths_map[build_version_path] = comp
+        component_map[(component, env)] = comp
+    except Exception as e:
+        logger.info('failed to discover unit: ', component, env)
+        raise e
 
 
 if __name__ == '__main__':
