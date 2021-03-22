@@ -79,7 +79,9 @@ class App extends React.Component {
     }
 
     async updateCurrent() {
-        this.state.current.version =
+            if (this.state.current.state === '') {
+                this.state.current.state = null;
+            }
             fetch('/components',
                 {
                     method: 'POST',
