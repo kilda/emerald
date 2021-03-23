@@ -226,7 +226,7 @@ class App extends React.Component {
                                                 action
                                                 onClick={() => this.showModal(item)}
                                             >
-                                                {item.service}/{item.color} {item.version} {item.state}
+                                                {item.service}/{item.color} {item.version}
                                             </ListGroup.Item>
 
                                         ))}
@@ -242,7 +242,7 @@ class App extends React.Component {
                                                 action
                                                 onClick={() => this.showModal(item)}
                                             >
-                                                {item.service}/{item.color} {item.version} {item.state}
+                                                {item.service}/{item.color} {item.version}
                                             </ListGroup.Item>
                                         ))}
                                 </ListGroup>
@@ -259,7 +259,7 @@ class App extends React.Component {
                                                 action
                                                 onClick={() => this.showModal(item)}
                                             >
-                                                {item.service}/{item.color} {item.version} {item.state}
+                                                {item.service}/{item.color} {item.version}
                                             </ListGroup.Item>
 
                                         ))}
@@ -272,7 +272,7 @@ class App extends React.Component {
                                             <ListGroup.Item
                                                 key={item.service + '/' + item.color}
                                                 variant='success'>
-                                                {item.service}/{item.color} {item.version} {item.state}
+                                                {item.service}/{item.color} {item.version}
                                             </ListGroup.Item>
                                         ))}
                                 </ListGroup>
