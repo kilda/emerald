@@ -139,6 +139,15 @@ def handle_requests():
             for v in component_map.values():
                 ans.append((vars(v)))
             rep_sock.send_json(ans)
+        elif m_type == 'update_global':
+            target_color = message['global']['color']
+            target_version = message['global']['version']
+            target_signal = message['global']['signal']
+            rep_sock.send_json({'success': True})
+            for k, v in component_map.items():
+                if v.color == target_color:
+                    zk.set(v.signal_path, str.encode(target_signal))
+                    zk.set(v.version_path, str.encode(target_version))
 
 
 def get_paths(root=zk_root):

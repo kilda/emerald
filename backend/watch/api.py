@@ -42,6 +42,10 @@ class Component(BaseModel):
     expected_state: Optional[int]
     expected_state_path: str
 
+class Global(BaseModel):
+    color: str
+    signal: str
+    version: str
 
 class Path(BaseModel):
     path: str
@@ -106,6 +110,12 @@ async def get_component(component: str, env: str):
     return await process_request({'type': 'get_component',
                                   'component': component, 'env': env})
 
+
+@app.post('/global')
+async def update_global(obj: Global):
+    await process_request({'type': 'update_global',
+                                   'global': vars(obj)})
+    return 202
 
 @app.post('/components')
 async def update_component(obj: Component):

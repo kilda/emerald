@@ -15,6 +15,10 @@ class App extends React.Component {
         this.state = {
             isLoaded: false,
             modal: false,
+            globalModal: false,
+            globalColor: null,
+            globalSignal: 'SHUTDOWN',
+            globalVersion: '',
             items: {},
             error: null,
             current: {
@@ -56,10 +60,26 @@ class App extends React.Component {
 
     }
 
+    showGlobalModal(color) {
+        this.setState({
+            globalModal: true,
+            globalColor: color,
+        });
+    }
+
     showModal(current) {
         this.setState({
             modal: true,
             current: current
+        });
+    }
+
+    closeGlobalModal() {
+        this.setState({
+            globalModal: false,
+            globalColor: null,
+            globalSignal: 'SHUTDOWN',
+            globalVersion: '',
         });
     }
 
@@ -79,20 +99,38 @@ class App extends React.Component {
     }
 
     async updateCurrent() {
-            if (this.state.current.state === '') {
-                this.state.current.state = null;
-            }
-            fetch('/components',
-                {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(this.state.current)
-                })
-                .then(res => {
-                    this.closeModal();
-                    this.getComponents();
-                })
+        if (this.state.current.state === '') {
+            this.state.current.state = null;
+        }
+        fetch('/components',
+            {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(this.state.current)
+            })
+            .then(res => {
+                this.closeModal();
+                this.getComponents();
+            })
     }
+
+    async updateGlobal() {
+        fetch('/global',
+            {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    color: this.state.globalColor,
+                    signal: this.state.globalSignal,
+                    version: this.state.globalVersion,
+                })
+            })
+            .then(res => {
+                this.closeGlobalModal();
+                this.getComponents();
+            })
+    }
+
 
     getComponents() {
         fetch("/components",
@@ -128,11 +166,26 @@ class App extends React.Component {
         this.setState({current: cur})
     }
 
+    updateGlobalToggle(val) {
+        let cur = this.state.globalSignal;
+        if (val) {
+            cur = "START";
+        } else {
+            cur = "SHUTDOWN";
+        }
+        this.setState({globalSignal: cur})
+    }
+
     updateVersion(val) {
         console.log(val);
         let cur = this.state.current
         cur.version = val;
         this.setState({current: cur})
+    }
+
+    updateGlobalVersion(val) {
+        console.log(val);
+        this.setState({globalVersion: val})
     }
 
     get_color(item) {
@@ -162,6 +215,46 @@ class App extends React.Component {
             });
             return (
                 <>
+                    <Modal
+                        show={this.state.globalModal}
+                        onHide={() => this.closeGlobalModal()}
+                        dialogClassName="modal-90w"
+                        aria-labelledby="example-custom-modal-styling-title"
+                    >
+                        <Modal.Header>
+                            <Modal.Title
+                                id="example-custom-modal-styling-title">
+                                {this.state.globalColor}
+                            </Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                            <Form>
+                                <Form.Group controlId="formVersion">
+                                    <Form.Label>Version</Form.Label>
+                                    <Form.Control type="text"
+                                                  onChange={(e) => this.updateGlobalVersion(e.target.value)}
+                                                  value={this.state.globalVersion}/>
+                                </Form.Group>
+
+                                <Form.Group controlId="formActive">
+                                    <Form.Check type="switch"
+                                                label="Activate"
+                                                checked={this.state.globalSignal === "START"}
+                                                onChange={(e) => this.updateGlobalToggle(e.currentTarget.checked)}/>
+                                </Form.Group>
+                                <Modal.Footer>
+                                    <Button variant="primary"
+                                            onClick={() => this.updateGlobal()}>
+                                        Update
+                                    </Button>
+                                    <Button variant="secondary"
+                                            onClick={() => this.closeGlobalModal()}>
+                                        Cancel
+                                    </Button>
+                                </Modal.Footer>
+                            </Form>
+                        </Modal.Body>
+                    </Modal>
                     <Modal
                         show={this.state.modal}
                         onHide={() => this.closeModal()}
@@ -218,6 +311,12 @@ class App extends React.Component {
                         <Row>
                             <Col>
                                 <ListGroup>
+                                    <ListGroup.Item
+                                        key="blue" variant="info"
+                                        action onClick={() => this.showGlobalModal("blue")}>
+                                        Blue
+                                    </ListGroup.Item>
+
                                     {vals.filter(item => item.color === "blue")
                                         .map(item => (
                                             <ListGroup.Item
@@ -234,6 +333,11 @@ class App extends React.Component {
                             </Col>
                             <Col>
                                 <ListGroup>
+                                    <ListGroup.Item
+                                        key="green" variant="info"
+                                        action onClick={() => this.showGlobalModal("green")}>
+                                        Green
+                                    </ListGroup.Item>
                                     {vals.filter(item => item.color === "green")
                                         .map(item => (
                                             <ListGroup.Item
