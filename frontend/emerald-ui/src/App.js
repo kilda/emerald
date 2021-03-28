@@ -312,7 +312,7 @@ class App extends React.Component {
                             <Col>
                                 <ListGroup>
                                     <ListGroup.Item
-                                        key="blue" variant="info"
+                                        key="blue" variant="secondary"
                                         action onClick={() => this.showGlobalModal("blue")}>
                                         Blue
                                     </ListGroup.Item>
@@ -334,7 +334,7 @@ class App extends React.Component {
                             <Col>
                                 <ListGroup>
                                     <ListGroup.Item
-                                        key="green" variant="info"
+                                        key="green" variant="secondary"
                                         action onClick={() => this.showGlobalModal("green")}>
                                         Green
                                     </ListGroup.Item>
