@@ -16,7 +16,7 @@ class App extends React.Component {
             isLoaded: false,
             modal: false,
             globalModal: false,
-            globalColor: null,
+            globalType: null,
             globalSignal: 'SHUTDOWN',
             globalVersion: '',
             items: {},
@@ -60,10 +60,10 @@ class App extends React.Component {
 
     }
 
-    showGlobalModal(color) {
+    showGlobalModal(globalType) {
         this.setState({
             globalModal: true,
-            globalColor: color,
+            globalType: globalType,
         });
     }
 
@@ -77,7 +77,7 @@ class App extends React.Component {
     closeGlobalModal() {
         this.setState({
             globalModal: false,
-            globalColor: null,
+            globalType: null,
             globalSignal: 'SHUTDOWN',
             globalVersion: '',
         });
@@ -120,7 +120,7 @@ class App extends React.Component {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
-                    color: this.state.globalColor,
+                    global_type: this.state.globalType,
                     signal: this.state.globalSignal,
                     version: this.state.globalVersion,
                 })
@@ -224,7 +224,7 @@ class App extends React.Component {
                         <Modal.Header>
                             <Modal.Title
                                 id="example-custom-modal-styling-title">
-                                {this.state.globalColor}
+                                {this.state.globalType}
                             </Modal.Title>
                         </Modal.Header>
                         <Modal.Body>
@@ -355,6 +355,11 @@ class App extends React.Component {
                         <Row className='mt-3'>
                             <Col>
                                 <ListGroup>
+                                    <ListGroup.Item
+                                        key="floodlight" variant="secondary"
+                                        action onClick={() => this.showGlobalModal("floodlight")}>
+                                        Floodlights
+                                    </ListGroup.Item>
                                     {vals.filter(item => item.service === "floodlight")
                                         .map(item => (
                                             <ListGroup.Item
@@ -371,6 +376,11 @@ class App extends React.Component {
                             </Col>
                             <Col>
                                 <ListGroup>
+                                    <ListGroup.Item
+                                        key="other" variant="secondary"
+                                        action>
+                                        Other
+                                    </ListGroup.Item>
                                     {vals.filter(item => item.color !== "green" && item.color !== "blue" && item.service !== "floodlight")
                                         .map(item => (
                                             <ListGroup.Item

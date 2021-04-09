@@ -43,7 +43,7 @@ class Component(BaseModel):
     expected_state_path: str
 
 class Global(BaseModel):
-    color: str
+    global_type: str
     signal: str
     version: str
 

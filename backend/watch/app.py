@@ -140,15 +140,15 @@ def handle_requests():
                 ans.append((vars(v)))
             rep_sock.send_json(ans)
         elif m_type == 'update_global':
-            target_color = message['global']['color']
-            target_version = message['global']['version']
-            target_signal = message['global']['signal']
+            glob = message['global']
+            global_type = glob['global_type']
+            target_version = glob['version']
+            target_signal = glob['signal']
             rep_sock.send_json({'success': True})
             for k, v in component_map.items():
-                if v.color == target_color:
+                if v.color == global_type or v.service == global_type:
                     zk.set(v.signal_path, str.encode(target_signal))
                     zk.set(v.version_path, str.encode(target_version))
-
 
 def get_paths(root=zk_root):
     children = zk.get_children(root)
