@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import sys
 from typing import Optional
 
@@ -15,6 +16,8 @@ from starlette.responses import RedirectResponse
 from zmq.asyncio import Context
 
 logging.basicConfig(stream=sys.stdout, level='INFO')
+
+zk_root = os.environ.get('ZK_ROOT', '/default')[1:]
 
 req_sock = None
 sub_sock = None
@@ -93,6 +96,11 @@ async def startup_event():
     sub_sock.connect("tcp://localhost:6666")
     sub_sock.setsockopt(zmq.SUBSCRIBE, b'')
 
+
+
+@app.get('/env')
+def get_env():
+    return {'env': zk_root}
 
 @app.post('/path')
 async def read_for_path(path: Path):

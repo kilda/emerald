@@ -7,12 +7,13 @@ import ListGroup from "react-bootstrap/ListGroup";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
-
+import Alert from "react-bootstrap/Alert";
 
 class App extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            env: '',
             isLoaded: false,
             modal: false,
             globalModal: false,
@@ -48,6 +49,7 @@ class App extends React.Component {
 
     componentDidMount() {
         this.getComponents();
+        this.getEnv();
         const sse = new EventSource('/stream', {withCredentials: true});
         sse.onmessage = e => this.getRealtimeData(e.data);
         sse.onerror = () => {
@@ -131,6 +133,20 @@ class App extends React.Component {
             })
     }
 
+    getEnv() {
+        fetch("/env",
+            {
+                credentials: 'include'
+            })
+            .then(res => res.json())
+            .then(
+                (result) => {
+                    this.setState({
+                        env: result['env']
+                    });
+                }
+            );
+    }
 
     getComponents() {
         fetch("/components",
@@ -308,6 +324,13 @@ class App extends React.Component {
                         </Modal.Body>
                     </Modal>
                     <Container fluid>
+                        <Row>
+                            <Col>
+                                <Alert variant='info'>
+                                {this.state.env}
+                                </Alert>
+                            </Col>
+                        </Row>
                         <Row>
                             <Col>
                                 <ListGroup>
