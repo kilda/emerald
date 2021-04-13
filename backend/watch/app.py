@@ -33,7 +33,8 @@ discovered_components = set()
 
 class Component:
     def __init__(self, service, color, signal, signal_path, state,
-                 state_path, version, version_path, expected_state, expected_state_path):
+                 state_path, version, version_path, expected_state,
+                 expected_state_path):
         self.service = service
         self.color = color
         self.signal = signal
@@ -146,9 +147,11 @@ def handle_requests():
             target_signal = glob['signal']
             rep_sock.send_json({'success': True})
             for k, v in component_map.items():
-                if v.color == global_type or v.service == global_type:
+                if (v.color == global_type and v.service not in set(
+                        ['northbound', 'grpc'])) or v.service == global_type:
                     zk.set(v.signal_path, str.encode(target_signal))
                     zk.set(v.version_path, str.encode(target_version))
+
 
 def get_paths(root=zk_root):
     children = zk.get_children(root)
@@ -229,7 +232,8 @@ def discover_unit(root, component, env):
         comp = Component(component, env, signal=signal,
                          signal_path=signal_path, state=state,
                          state_path=state_path, version=build_version,
-                         version_path=build_version_path, expected_state=expected_state,
+                         version_path=build_version_path,
+                         expected_state=expected_state,
                          expected_state_path=expected_state_path)
         paths_map[signal_path] = comp
         paths_map[state_path] = comp

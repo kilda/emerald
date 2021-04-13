@@ -337,10 +337,10 @@ class App extends React.Component {
                                     <ListGroup.Item
                                         key="blue" variant="secondary"
                                         action onClick={() => this.showGlobalModal("blue")}>
-                                        Blue
+                                        Blue Storm
                                     </ListGroup.Item>
 
-                                    {vals.filter(item => item.color === "blue")
+                                    {vals.filter(item => item.color === "blue" && item.service !== "northbound" && item.service !== "grpc")
                                         .map(item => (
                                             <ListGroup.Item
                                                 key={item.service + '/' + item.color}
@@ -359,9 +359,9 @@ class App extends React.Component {
                                     <ListGroup.Item
                                         key="green" variant="secondary"
                                         action onClick={() => this.showGlobalModal("green")}>
-                                        Green
+                                        Green Storm
                                     </ListGroup.Item>
-                                    {vals.filter(item => item.color === "green")
+                                    {vals.filter(item => item.color === "green"  && item.service !== "northbound" && item.service !== "grpc" )
                                         .map(item => (
                                             <ListGroup.Item
                                                 key={item.service + '/' + item.color}
@@ -375,6 +375,49 @@ class App extends React.Component {
                                 </ListGroup>
                             </Col>
                         </Row>
+                        <Row className='mt-3'>
+                            <Col>
+                                <ListGroup>
+                                    <ListGroup.Item
+                                        key="blue" variant="secondary">
+                                        Blue Other
+                                    </ListGroup.Item>
+
+                                    {vals.filter(item => item.color === "blue" && (item.service === "northbound" || item.service === "grpc"))
+                                        .map(item => (
+                                            <ListGroup.Item
+                                                key={item.service + '/' + item.color}
+                                                variant={this.get_color(item)}
+                                                action
+                                                onClick={() => this.showModal(item)}
+                                            >
+                                                {item.service}/{item.color} {item.version}
+                                            </ListGroup.Item>
+
+                                        ))}
+                                </ListGroup>
+                            </Col>
+                            <Col>
+                                <ListGroup>
+                                    <ListGroup.Item
+                                        key="green" variant="secondary">
+                                        Green Other
+                                    </ListGroup.Item>
+                                    {vals.filter(item => item.color === "green" && (item.service === "northbound" || item.service === "grpc"))
+                                        .map(item => (
+                                            <ListGroup.Item
+                                                key={item.service + '/' + item.color}
+                                                variant={this.get_color(item)}
+                                                action
+                                                onClick={() => this.showModal(item)}
+                                            >
+                                                {item.service}/{item.color} {item.version}
+                                            </ListGroup.Item>
+                                        ))}
+                                </ListGroup>
+                            </Col>
+                        </Row>
+
                         <Row className='mt-3'>
                             <Col>
                                 <ListGroup>
