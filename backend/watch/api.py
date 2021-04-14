@@ -47,8 +47,9 @@ class Component(BaseModel):
 
 class Global(BaseModel):
     global_type: str
-    signal: str
-    version: str
+    global_color: str
+    global_signal: str
+    global_version: str
 
 class Path(BaseModel):
     path: str

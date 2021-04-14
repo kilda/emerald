@@ -143,12 +143,19 @@ def handle_requests():
         elif m_type == 'update_global':
             glob = message['global']
             global_type = glob['global_type']
-            target_version = glob['version']
-            target_signal = glob['signal']
+            global_color = glob['global_color']
+            target_version = glob['global_version']
+            target_signal = glob['global_signal']
             rep_sock.send_json({'success': True})
             for k, v in component_map.items():
-                if (v.color == global_type and v.service not in set(
-                        ['northbound', 'grpc'])) or v.service == global_type:
+                if v.service == global_type and global_type == 'floodlight':
+                    zk.set(v.signal_path, str.encode(target_signal))
+                    zk.set(v.version_path, str.encode(target_version))
+                elif v.color == global_color and global_type == 'storm' and v.service not in set(
+                        ['grpc', 'northbound']):
+                    zk.set(v.signal_path, str.encode(target_signal))
+                    zk.set(v.version_path, str.encode(target_version))
+                elif v.color == global_color and global_type == 'other' and v.service in set(['grpc', 'northbound']):
                     zk.set(v.signal_path, str.encode(target_signal))
                     zk.set(v.version_path, str.encode(target_version))
 

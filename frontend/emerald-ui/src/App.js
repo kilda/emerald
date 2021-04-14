@@ -17,9 +17,12 @@ class App extends React.Component {
             isLoaded: false,
             modal: false,
             globalModal: false,
-            globalType: null,
-            globalSignal: 'SHUTDOWN',
-            globalVersion: '',
+            glob: {
+                global_type: '',
+                global_color: '',
+                global_signal: 'SHUTDOWN',
+                global_version: '',
+            },
             items: {},
             error: null,
             current: {
@@ -62,10 +65,13 @@ class App extends React.Component {
 
     }
 
-    showGlobalModal(globalType) {
+    showGlobalModal(global_type, global_color) {
+        let cur = this.state.glob;
+        cur.global_color = global_color;
+        cur.global_type = global_type;
         this.setState({
             globalModal: true,
-            globalType: globalType,
+            glob: cur
         });
     }
 
@@ -79,9 +85,12 @@ class App extends React.Component {
     closeGlobalModal() {
         this.setState({
             globalModal: false,
-            globalType: null,
-            globalSignal: 'SHUTDOWN',
-            globalVersion: '',
+            glob: {
+                global_type: '',
+                global_color: '',
+                global_signal: 'SHUTDOWN',
+                global_version: '',
+            },
         });
     }
 
@@ -121,11 +130,7 @@ class App extends React.Component {
             {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    global_type: this.state.globalType,
-                    signal: this.state.globalSignal,
-                    version: this.state.globalVersion,
-                })
+                body: JSON.stringify(this.state.glob)
             })
             .then(res => {
                 this.closeGlobalModal();
@@ -183,13 +188,13 @@ class App extends React.Component {
     }
 
     updateGlobalToggle(val) {
-        let cur = this.state.globalSignal;
+        let cur = this.state.glob;
         if (val) {
-            cur = "START";
+            cur.global_signal = "START";
         } else {
-            cur = "SHUTDOWN";
+            cur.global_signal = "SHUTDOWN";
         }
-        this.setState({globalSignal: cur})
+        this.setState({glob: cur})
     }
 
     updateVersion(val) {
@@ -199,9 +204,11 @@ class App extends React.Component {
         this.setState({current: cur})
     }
 
-    updateGlobalVersion(val) {
+    updateglobal_version(val) {
         console.log(val);
-        this.setState({globalVersion: val})
+        let cur = this.state.glob;
+        cur.global_version = val;
+        this.setState({glob: cur})
     }
 
     get_color(item) {
@@ -240,7 +247,7 @@ class App extends React.Component {
                         <Modal.Header>
                             <Modal.Title
                                 id="example-custom-modal-styling-title">
-                                {this.state.globalType}
+                                {this.state.glob.global_type}/{this.state.glob.global_color}
                             </Modal.Title>
                         </Modal.Header>
                         <Modal.Body>
@@ -248,14 +255,14 @@ class App extends React.Component {
                                 <Form.Group controlId="formVersion">
                                     <Form.Label>Version</Form.Label>
                                     <Form.Control type="text"
-                                                  onChange={(e) => this.updateGlobalVersion(e.target.value)}
-                                                  value={this.state.globalVersion}/>
+                                                  onChange={(e) => this.updateglobal_version(e.target.value)}
+                                                  value={this.state.glob.global_version}/>
                                 </Form.Group>
 
                                 <Form.Group controlId="formActive">
                                     <Form.Check type="switch"
                                                 label="Activate"
-                                                checked={this.state.globalSignal === "START"}
+                                                checked={this.state.glob.global_signal === "START"}
                                                 onChange={(e) => this.updateGlobalToggle(e.currentTarget.checked)}/>
                                 </Form.Group>
                                 <Modal.Footer>
@@ -336,7 +343,7 @@ class App extends React.Component {
                                 <ListGroup>
                                     <ListGroup.Item
                                         key="blue" variant="secondary"
-                                        action onClick={() => this.showGlobalModal("blue")}>
+                                        action onClick={() => this.showGlobalModal("storm","blue")}>
                                         Blue Storm
                                     </ListGroup.Item>
 
@@ -358,7 +365,7 @@ class App extends React.Component {
                                 <ListGroup>
                                     <ListGroup.Item
                                         key="green" variant="secondary"
-                                        action onClick={() => this.showGlobalModal("green")}>
+                                        action onClick={() => this.showGlobalModal("storm", "green")}>
                                         Green Storm
                                     </ListGroup.Item>
                                     {vals.filter(item => item.color === "green"  && item.service !== "northbound" && item.service !== "grpc" )
@@ -379,7 +386,8 @@ class App extends React.Component {
                             <Col>
                                 <ListGroup>
                                     <ListGroup.Item
-                                        key="blue" variant="secondary">
+                                        key="blue" variant="secondary"
+                                        action onClick={() => this.showGlobalModal("other", "blue")}>
                                         Blue Other
                                     </ListGroup.Item>
 
@@ -400,7 +408,8 @@ class App extends React.Component {
                             <Col>
                                 <ListGroup>
                                     <ListGroup.Item
-                                        key="green" variant="secondary">
+                                        key="green" variant="secondary"
+                                        action onClick={() => this.showGlobalModal("other", "green")}>
                                         Green Other
                                     </ListGroup.Item>
                                     {vals.filter(item => item.color === "green" && (item.service === "northbound" || item.service === "grpc"))
@@ -423,7 +432,7 @@ class App extends React.Component {
                                 <ListGroup>
                                     <ListGroup.Item
                                         key="floodlight" variant="secondary"
-                                        action onClick={() => this.showGlobalModal("floodlight")}>
+                                        action onClick={() => this.showGlobalModal("floodlight", "")}>
                                         Floodlights
                                     </ListGroup.Item>
                                     {vals.filter(item => item.service === "floodlight")
