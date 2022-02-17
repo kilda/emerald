@@ -111,53 +111,62 @@ def root_children_callback(root, children, event):
 
 
 def handle_requests():
+    global rep_sock
     while True:
-        message = json.loads(rep_sock.recv_multipart()[0])
-        print(message)
-        m_type = message['type']
-        if m_type == 'get_path':
-            path = message['path']
-            rep_sock.send_json({'path': path,
-                                'data': paths_map[path].get_for_path(path)})
-        elif m_type == 'set_path':
-            path = message['path']
-            new_val = str.encode(message['value'])
-            zk.set_async(path, new_val)
-            rep_sock.send_json({'path': path,
-                                'success': True})
-        elif m_type == 'get_component':
-            comp = message['component']
-            env = message['env']
-            rep_sock.send_json(vars(component_map[(comp, env)]))
-        elif m_type == 'update_component':
-            comp = message['component']
-            zk.set(comp['signal_path'], str.encode(comp['signal']))
-            zk.set(comp['version_path'], str.encode(comp['version']))
-            rep_sock.send_json({'path': comp['service'] + '/' + comp['color'],
-                                'success': True})
-        elif m_type == 'components':
-            ans = []
-            for v in component_map.values():
-                ans.append((vars(v)))
-            rep_sock.send_json(ans)
-        elif m_type == 'update_global':
-            glob = message['global']
-            global_type = glob['global_type']
-            global_color = glob['global_color']
-            target_version = glob['global_version']
-            target_signal = glob['global_signal']
-            rep_sock.send_json({'success': True})
-            for k, v in component_map.items():
-                if v.service == global_type and global_type == 'floodlight':
-                    zk.set(v.signal_path, str.encode(target_signal))
-                    zk.set(v.version_path, str.encode(target_version))
-                elif v.color == global_color and global_type == 'storm' and v.service not in set(
-                        ['grpc', 'northbound']):
-                    zk.set(v.signal_path, str.encode(target_signal))
-                    zk.set(v.version_path, str.encode(target_version))
-                elif v.color == global_color and global_type == 'other' and v.service in set(['grpc', 'northbound']):
-                    zk.set(v.signal_path, str.encode(target_signal))
-                    zk.set(v.version_path, str.encode(target_version))
+        try:
+            data = rep_sock.recv_multipart()[0]
+            print(data)
+            message = json.loads(data)
+
+            m_type = message['type']
+            if m_type == 'get_path':
+                path = message['path']
+                rep_sock.send_json({'path': path,
+                                    'data': paths_map[path].get_for_path(path)})
+            elif m_type == 'set_path':
+                path = message['path']
+                new_val = str.encode(message['value'])
+                zk.set_async(path, new_val)
+                rep_sock.send_json({'path': path,
+                                    'success': True})
+            elif m_type == 'get_component':
+                comp = message['component']
+                env = message['env']
+                rep_sock.send_json(vars(component_map[(comp, env)]))
+            elif m_type == 'update_component':
+                comp = message['component']
+                zk.set(comp['signal_path'], str.encode(comp['signal']))
+                zk.set(comp['version_path'], str.encode(comp['version']))
+                rep_sock.send_json({'path': comp['service'] + '/' + comp['color'],
+                                    'success': True})
+            elif m_type == 'components':
+                ans = []
+                for v in component_map.values():
+                    ans.append((vars(v)))
+                rep_sock.send_json(ans)
+            elif m_type == 'update_global':
+                glob = message['global']
+                global_type = glob['global_type']
+                global_color = glob['global_color']
+                target_version = glob['global_version']
+                target_signal = glob['global_signal']
+                rep_sock.send_json({'success': True})
+                for k, v in component_map.items():
+                    if v.service == global_type and global_type == 'floodlight':
+                        zk.set(v.signal_path, str.encode(target_signal))
+                        zk.set(v.version_path, str.encode(target_version))
+                    elif v.color == global_color and global_type == 'storm' and v.service not in set(
+                            ['grpc', 'northbound']):
+                        zk.set(v.signal_path, str.encode(target_signal))
+                        zk.set(v.version_path, str.encode(target_version))
+                    elif v.color == global_color and global_type == 'other' and v.service in set(['grpc', 'northbound']):
+                        zk.set(v.signal_path, str.encode(target_signal))
+                        zk.set(v.version_path, str.encode(target_version))
+        except Exception as e:
+            rep_sock.close()
+            rep_sock = ctx.socket(zmq.REP)
+            rep_sock.connect("tcp://localhost:6667")
+            print(e)
 
 
 def get_paths(root=zk_root):

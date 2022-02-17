@@ -4,6 +4,7 @@ import os
 import sys
 from typing import Optional
 
+import asyncio
 import uvicorn
 import zmq
 from fastapi import FastAPI
@@ -57,11 +58,19 @@ class Path(BaseModel):
 
 
 async def process_request(payload):
-    await req_sock.send(b'', zmq.SNDMORE)
-    await req_sock.send_json(payload)
-    message = await req_sock.recv_multipart()
-    resp = json.loads(message[1])
-    return resp
+    global req_sock
+    try:
+        await req_sock.send(b'', zmq.SNDMORE)
+        await req_sock.send_json(payload)
+        message = await asyncio.wait_for(req_sock.recv_multipart(), timeout=2.0)
+        resp = json.loads(message[1])
+        return resp
+    except Exception as e:
+        print(e)
+        req_sock.close()
+        await init_req_sock()
+        return {}
+
 
 
 @app.get('/stream')
@@ -84,24 +93,31 @@ async def message_stream(request: Request):
     return EventSourceResponse(event_generator())
 
 
-@app.on_event('startup')
-async def startup_event():
+async def init_req_sock():
     global req_sock
     ctx = Context.instance()
     req_sock = ctx.socket(zmq.DEALER)
     req_sock.bind('tcp://*:6667')
 
-    global sub_sock
-    sub_sock = ctx.socket(zmq.SUB)
 
+async def init_sub_sock():
+    global sub_sock
+    ctx = Context.instance()
+    sub_sock = ctx.socket(zmq.SUB)
     sub_sock.connect("tcp://localhost:6666")
     sub_sock.setsockopt(zmq.SUBSCRIBE, b'')
 
+
+@app.on_event('startup')
+async def startup_event():
+    await init_req_sock()
+    await init_sub_sock()
 
 
 @app.get('/env')
 def get_env():
     return {'env': zk_root}
+
 
 @app.post('/path')
 async def read_for_path(path: Path):
