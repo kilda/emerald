@@ -1,7 +1,7 @@
-kazoo
-eventlet
-pyzmq
-fastapi
-uvicorn
-sse-starlette
-aiofiles
+kazoo==2.8.0
+eventlet==0.33.1
+pyzmq==22.3.0
+fastapi==0.78.0
+uvicorn==0.17.6
+sse-starlette==0.10.3
+aiofiles==0.8.0
