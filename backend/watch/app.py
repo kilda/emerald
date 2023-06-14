@@ -244,6 +244,7 @@ def discover_unit(root, component, env):
                 expected_state = expected_state.decode('utf-8')
             if expected_state:
                 expected_state = int(expected_state)
+            zk.DataWatch(expected_state_path, partial(my_callback, expected_state_path))
 
         comp = Component(component, env, signal=signal,
                          signal_path=signal_path, state=state,
@@ -253,6 +254,7 @@ def discover_unit(root, component, env):
                          expected_state_path=expected_state_path)
         paths_map[signal_path] = comp
         paths_map[state_path] = comp
+        paths_map[expected_state_path] = comp
         paths_map[build_version_path] = comp
         component_map[(component, env)] = comp
     except Exception as e:
